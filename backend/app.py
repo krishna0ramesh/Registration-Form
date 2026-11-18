@@ -14,6 +14,7 @@ client = MongoClient(os.getenv("MONGO_URI"))
 
 db = client["flask_database"]
 collection = db["submissions"]
+todo_collection = db["todo_items"]
 
 
 # Task 1: JSON API
@@ -61,6 +62,25 @@ def submit_data():
         return jsonify({
             "error": "Unable to save data to MongoDB"
         }), 500
+
+
+@app.route('/submittodoitem', methods=['POST'])
+def submit_todo_item():
+
+    item_name = request.form.get('itemName')
+    item_description = request.form.get('itemDescription')
+
+    if not item_name or not item_description:
+        return jsonify({"error": "Both fields are required"}), 400
+
+    todo_collection.insert_one({
+        "itemName": item_name,
+        "itemDescription": item_description
+    })
+
+    return jsonify({
+        "message": "To-Do item submitted successfully"
+    }), 201
 
 
 if __name__ == '__main__':
